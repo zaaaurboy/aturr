@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atur Aja - Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="dashboard.html" class="brand">Atur Aja</a>
+      <div class="nav-buttons">
+        <a href="input.html">Input Data</a>
+        <a href="simulasi.html">Simulasi</a>
+        <a href="laporan.html">Laporan</a>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <h1>Selamat Datang di Dashboard</h1>
+    <p>Gunakan menu di atas untuk mengakses fitur aplikasi.</p>
+  </main>
+  <script>
+    // Periksa apakah pengguna sudah login
+    const userSession = JSON.parse(localStorage.getItem('aturAja_userSession'));
+    if (!userSession) {
+      alert('Anda harus login terlebih dahulu.');
+      window.location.href = 'index.html';
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('aturAja_userSession');
+      alert('Anda telah logout.');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

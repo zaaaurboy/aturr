@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atur Aja - Registrasi</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .register-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #333;
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: #3399ff;
+      outline: none;
+    }
+    .error-message {
+      color: #d9534f;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    button {
+      background-color: #3399ff;
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #2673cc;
+    }
+    .login-link {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    .login-link a {
+      color: #3399ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container" role="main" aria-labelledby="register-title">
+    <h2 id="register-title">Daftar Akun Baru</h2>
+    <form id="registerForm" novalidate>
+      <label for="fullname">Nama Lengkap</label>
+      <input type="text" id="fullname" name="fullname" required aria-required="true" autocomplete="name" />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required aria-required="true" autocomplete="email" />
+
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required aria-required="true" autocomplete="username" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" minlength="6" required aria-required="true" autocomplete="new-password" />
+
+      <label for="confirmPassword">Konfirmasi Password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" minlength="6" required aria-required="true" autocomplete="new-password" />
+
+      <div class="error-message" id="errorMessage" role="alert" aria-live="assertive"></div>
+
+      <button type="submit" aria-label="Daftar">Daftar</button>
+    </form>
+    <p class="login-link">
+      Sudah punya akun? <a href="login.html">Masuk di sini</a>
+    </p>
+  </div>
+
+  <script src="main.js"></script>
+  <script>
+    // Override registerUser to include username and fullname, and fix email/username uniqueness
+    function registerUser(email, password, username, fullname) {
+      let users = JSON.parse(localStorage.getItem('aturAja_users')) || [];
+
+      // Check if email or username already registered
+      if (users.find(u => u.email === email)) {
+        return { success: false, message: 'Email sudah terdaftar.' };
+      }
+      if (users.find(u => u.username === username)) {
+        return { success: false, message: 'Username sudah digunakan.' };
+      }
+
+      users.push({ email, password, username, fullname });
+      localStorage.setItem('aturAja_users', JSON.stringify(users));
+      return { success: true };
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const fullname = this.fullname.value.trim();
+      const email = this.email.value.trim();
+      const username = this.username.value.trim();
+      const password = this.password.value;
+      const confirmPassword = this.confirmPassword.value;
+      const errorMessageEl = document.getElementById('errorMessage');
+
+      errorMessageEl.style.display = 'none';
+      errorMessageEl.textContent = '';
+
+      // Basic validation
+      if (!fullname) {
+        errorMessageEl.textContent = 'Nama lengkap wajib diisi.';
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+      if (!email) {
+        errorMessageEl.textContent = 'Email wajib diisi.';
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        errorMessageEl.textContent = 'Format email tidak valid.';
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+      if (!username) {
+        errorMessageEl.textContent = 'Username wajib diisi.';
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+      if (!password) {
+        errorMessageEl.textContent = 'Password wajib diisi.';
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+      if (password.length < 6) {
+        errorMessageEl.textContent = 'Password minimal 6 karakter.';
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+      if (password !== confirmPassword) {
+        errorMessageEl.textContent = 'Password dan konfirmasi password tidak cocok.';
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+
+      // Call registerUser function
+      const result = registerUser(email, password, username, fullname);
+      if (!result.success) {
+        errorMessageEl.textContent = result.message;
+        errorMessageEl.style.display = 'block';
+        return;
+      }
+
+      alert('Registrasi berhasil. Silakan login.');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

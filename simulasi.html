@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atur Aja - Simulasi Produksi</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f8;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background-color: #3399ff;
+      color: white;
+      width: 100%;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar .brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+    }
+    .nav-buttons a {
+      color: white;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      font-weight: bold;
+    }
+    .nav-buttons a:hover, .nav-buttons a:focus {
+      text-decoration: underline;
+    }
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 700px;
+      background: white;
+      margin: 2rem 1rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #3399ff;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+    input[type="number"], input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    fieldset {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 1rem;
+    }
+    legend {
+      font-weight: bold;
+      color: #555;
+    }
+    button {
+      background-color: #3399ff;
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 150px;
+      align-self: flex-start;
+    }
+    button:hover, button:focus {
+      background-color: #2673cc;
+      outline: none;
+    }
+    .result {
+      margin-top: 2rem;
+      background: #d4edda;
+      border: 1px solid #28a745;
+      padding: 1rem;
+      border-radius: 6px;
+      color: #155724;
+    }
+    .result h3 {
+      margin-top: 0;
+    }
+    nav {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    nav a {
+      color: #3399ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover, nav a:focus {
+      text-decoration: underline;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="dashboard.html" class="brand">Atur Aja</a>
+      <div class="nav-buttons">
+        <a href="input.html">Input Data</a>
+        <a href="simulasi.html">Simulasi</a>
+        <a href="laporan.html">Laporan</a>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <h2>Simulasi Produksi</h2>
+    <form id="simulationForm" aria-label="Form simulasi produksi">
+      <fieldset>
+        <legend>Pilih Metode Simulasi</legend>
+        <label>
+          <input type="radio" name="simType" value="targetProfit" checked aria-describedby="descTargetProfit" />
+          Target Keuntungan
+        </label>
+        <p id="descTargetProfit" style="margin-left: 1.5rem; font-size: 0.9rem; color: #555;">
+          Masukkan target keuntungan yang ingin dicapai, sistem akan menghitung jumlah produk dan kebutuhan bahan.
+        </p>
+        <label>
+          <input type="radio" name="simType" value="availableMaterials" aria-describedby="descAvailableMaterials" />
+          Jumlah Bahan Tersedia
+        </label>
+        <p id="descAvailableMaterials" style="margin-left: 1.5rem; font-size: 0.9rem; color: #555;">
+          Masukkan jumlah bahan baku yang tersedia, sistem akan menghitung berapa produk yang bisa dibuat dan estimasi keuntungannya.
+        </p>
+      </fieldset>
+
+      <div id="targetProfitInput">
+        <label for="targetProfit">Target Keuntungan (Rp)</label>
+        <input type="number" id="targetProfit" name="targetProfit" min="0" step="1000" aria-required="true" />
+      </div>
+
+      <div id="availableMaterialsInput" style="display:none;">
+        <label for="materialQuantity">Jumlah Bahan Tersedia (unit)</label>
+        <input type="number" id="materialQuantity" name="materialQuantity" min="0" step="1" aria-required="true" />
+      </div>
+
+      <button type="submit" aria-label="Jalankan Simulasi">Jalankan Simulasi</button>
+    </form>
+
+    <section id="simulationResult" class="result" aria-live="polite" style="display:none;">
+      <h3>Hasil Simulasi</h3>
+      <p id="resultSummary"></p>
+      <ul id="resultDetails"></ul>
+    </section>
+
+    <section aria-labelledby="bep-title" style="margin-top: 2rem;">
+      <h2 id="bep-title" style="color: #3399ff;">Perhitungan Break-Even Point (BEP)</h2>
+      <form id="bepForm">
+        <label for="fixedCost">Biaya Tetap (Rp)</label>
+        <input type="number" id="fixedCost" name="fixedCost" required />
+
+        <label for="variableCost">Biaya Variabel per Unit (Rp)</label>
+        <input type="number" id="variableCost" name="variableCost" required />
+
+        <label for="sellingPrice">Harga Jual per Unit (Rp)</label>
+        <input type="number" id="sellingPrice" name="sellingPrice" required />
+
+        <button type="submit">Hitung BEP</button>
+      </form>
+      <div id="bepResult" style="display:none;"></div>
+    </section>
+
+    <nav>
+      <a href="dashboard.html" aria-label="Kembali ke Dashboard">← Kembali ke Dashboard</a>
+    </nav>
+  </main>
+
+  <script>
+    // Dummy data for simulation - in real app, this would come from backend or storage
+    const products = [
+      { name: "Produk A", price: 50000, materialsNeeded: 2 },
+      { name: "Produk B", price: 75000, materialsNeeded: 3 },
+      { name: "Produk C", price: 100000, materialsNeeded: 5 }
+    ];
+
+    const materialCostPerUnit = 10000; // Assume fixed cost per material unit
+
+    const simTypeRadios = document.querySelectorAll('input[name="simType"]');
+    const targetProfitInputDiv = document.getElementById('targetProfitInput');
+    const availableMaterialsInputDiv = document.getElementById('availableMaterialsInput');
+    const simulationForm = document.getElementById('simulationForm');
+    const simulationResult = document.getElementById('simulationResult');
+    const resultSummary = document.getElementById('resultSummary');
+    const resultDetails = document.getElementById('resultDetails');
+
+    // Toggle input fields based on selected simulation type
+    simTypeRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'targetProfit' && radio.checked) {
+          targetProfitInputDiv.style.display = 'block';
+          availableMaterialsInputDiv.style.display = 'none';
+          document.getElementById('targetProfit').setAttribute('aria-required', 'true');
+          document.getElementById('materialQuantity').removeAttribute('aria-required');
+        } else if (radio.value === 'availableMaterials' && radio.checked) {
+          targetProfitInputDiv.style.display = 'none';
+          availableMaterialsInputDiv.style.display = 'block';
+          document.getElementById('materialQuantity').setAttribute('aria-required', 'true');
+          document.getElementById('targetProfit').removeAttribute('aria-required');
+        }
+        simulationResult.style.display = 'none';
+        resultSummary.textContent = '';
+        resultDetails.innerHTML = '';
+      });
+    });
+
+    simulationForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const simType = document.querySelector('input[name="simType"]:checked').value;
+
+      if (simType === 'targetProfit') {
+        const targetProfit = parseFloat(document.getElementById('targetProfit').value);
+        if (isNaN(targetProfit) || targetProfit < 0) {
+          alert('Mohon masukkan target keuntungan yang valid.');
+          return;
+        }
+        runTargetProfitSimulation(targetProfit);
+      } else if (simType === 'availableMaterials') {
+        const materialQty = parseInt(document.getElementById('materialQuantity').value, 10);
+        if (isNaN(materialQty) || materialQty < 0) {
+          alert('Mohon masukkan jumlah bahan yang valid.');
+          return;
+        }
+        runAvailableMaterialsSimulation(materialQty);
+      }
+    });
+
+    function runTargetProfitSimulation(targetProfit) {
+      // Simple logic: calculate how many products needed to reach target profit
+      // For demo, assume profit per product = price - (materialsNeeded * materialCostPerUnit)
+      // Distribute production to maximize profit (greedy approach)
+      let remainingProfit = targetProfit;
+      let productionPlan = [];
+      let totalCost = 0;
+      let totalRevenue = 0;
+      let totalMaterialsUsed = 0;
+
+      // Sort products by profit margin descending
+      const productsSorted = products.slice().sort((a,b) => {
+        return (b.price - b.materialsNeeded * materialCostPerUnit) - (a.price - a.materialsNeeded * materialCostPerUnit);
+      });
+
+      for (const product of productsSorted) {
+        const profitPerUnit = product.price - product.materialsNeeded * materialCostPerUnit;
+        if (profitPerUnit <= 0) continue; // skip unprofitable products
+
+        const qtyNeeded = Math.ceil(remainingProfit / profitPerUnit);
+        productionPlan.push({ name: product.name, quantity: qtyNeeded, profitPerUnit });
+        totalCost += qtyNeeded * product.materialsNeeded * materialCostPerUnit;
+        totalRevenue += qtyNeeded * product.price;
+        totalMaterialsUsed += qtyNeeded * product.materialsNeeded;
+        remainingProfit -= qtyNeeded * profitPerUnit;
+        if (remainingProfit <= 0) break;
+      }
+
+      if (remainingProfit > 0) {
+        resultSummary.textContent = "Target keuntungan tidak dapat dicapai dengan produk yang tersedia.";
+        resultDetails.innerHTML = '';
+      } else {
+        resultSummary.textContent = `Untuk mencapai target keuntungan Rp ${targetProfit.toLocaleString('id-ID')}, berikut estimasi produksi dan kebutuhan bahan:`;
+        resultDetails.innerHTML = '';
+        productionPlan.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = `${item.name}: ${item.quantity} unit (Margin per unit: Rp ${item.profitPerUnit.toLocaleString('id-ID')})`;
+          resultDetails.appendChild(li);
+        });
+        const summaryLi1 = document.createElement('li');
+        summaryLi1.textContent = `Total biaya bahan: Rp ${totalCost.toLocaleString('id-ID')}`;
+        const summaryLi2 = document.createElement('li');
+        summaryLi2.textContent = `Total pendapatan: Rp ${totalRevenue.toLocaleString('id-ID')}`;
+        const summaryLi3 = document.createElement('li');
+        summaryLi3.textContent = `Total bahan yang digunakan: ${totalMaterialsUsed} unit`;
+        resultDetails.appendChild(summaryLi1);
+        resultDetails.appendChild(summaryLi2);
+        resultDetails.appendChild(summaryLi3);
+      }
+      simulationResult.style.display = 'block';
+    }
+
+    function runAvailableMaterialsSimulation(materialQty) {
+      // Calculate max products that can be made with available materials
+      // For demo, distribute materials to maximize profit (greedy)
+      let remainingMaterials = materialQty;
+      let productionPlan = [];
+      let totalCost = 0;
+      let totalRevenue = 0;
+
+      // Sort products by profit margin descending
+      const productsSorted = products.slice().sort((a,b) => {
+        return (b.price - b.materialsNeeded * materialCostPerUnit) - (a.price - a.materialsNeeded * materialCostPerUnit);
+      });
+
+      for (const product of productsSorted) {
+        const profitPerUnit = product.price - product.materialsNeeded * materialCostPerUnit;
+        if (profitPerUnit <= 0) continue; // skip unprofitable products
+
+        const maxQty = Math.floor(remainingMaterials / product.materialsNeeded);
+        if (maxQty <= 0) continue;
+
+        productionPlan.push({ name: product.name, quantity: maxQty, profitPerUnit });
+        totalCost += maxQty * product.materialsNeeded * materialCostPerUnit;
+        totalRevenue += maxQty * product.price;
+        remainingMaterials -= maxQty * product.materialsNeeded;
+      }
+
+      const totalProfit = totalRevenue - totalCost;
+
+      resultSummary.textContent = `Dengan bahan tersedia sebanyak ${materialQty} unit, estimasi produksi dan keuntungan adalah sebagai berikut:`;
+      resultDetails.innerHTML = '';
+      productionPlan.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.name}: ${item.quantity} unit (Margin per unit: Rp ${item.profitPerUnit.toLocaleString('id-ID')})`;
+        resultDetails.appendChild(li);
+      });
+      const summaryLi1 = document.createElement('li');
+      summaryLi1.textContent = `Total biaya bahan: Rp ${totalCost.toLocaleString('id-ID')}`;
+      const summaryLi2 = document.createElement('li');
+      summaryLi2.textContent = `Total pendapatan: Rp ${totalRevenue.toLocaleString('id-ID')}`;
+      const summaryLi3 = document.createElement('li');
+      summaryLi3.textContent = `Estimasi keuntungan: Rp ${totalProfit.toLocaleString('id-ID')}`;
+      const summaryLi4 = document.createElement('li');
+      summaryLi4.textContent = `Sisa bahan: ${remainingMaterials} unit`;
+      resultDetails.appendChild(summaryLi1);
+      resultDetails.appendChild(summaryLi2);
+      resultDetails.appendChild(summaryLi3);
+      resultDetails.appendChild(summaryLi4);
+
+      simulationResult.style.display = 'block';
+    }
+
+    document.getElementById('bepForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const fixedCost = parseFloat(document.getElementById('fixedCost').value);
+      const variableCost = parseFloat(document.getElementById('variableCost').value);
+      const sellingPrice = parseFloat(document.getElementById('sellingPrice').value);
+
+      const bep = fixedCost / (sellingPrice - variableCost);
+      const resultDiv = document.getElementById('bepResult');
+      resultDiv.textContent = `Break-Even Point: ${Math.ceil(bep)} unit`;
+      resultDiv.style.display = 'block';
+    });
+  </script>
+</body>
+</html>
+``` 

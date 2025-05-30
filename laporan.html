@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atur Aja - Laporan</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f8;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background-color: #3399ff;
+      color: white;
+      width: 100%;
+      padding: 1rem 2rem;
+      box-sizing: border-box;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar .brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+    }
+    .navbar .nav-buttons a {
+      color: white;
+      text-decoration: none;
+      margin-left: 1rem;
+      font-size: 1rem;
+    }
+    .navbar .nav-buttons a:hover,
+    .navbar .nav-buttons a:focus {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 900px;
+      width: 100%;
+      padding: 1rem 2rem;
+      box-sizing: border-box;
+      margin-top: 1rem;
+      flex-grow: 1;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #3399ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: #3399ff;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr:nth-child(even) {
+      background-color: #e9f0ff;
+    }
+    tr:hover {
+      background-color: #d0e4ff;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    button {
+      background-color: #3399ff;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover,
+    button:focus {
+      background-color: #2673cc;
+      outline: none;
+    }
+    a.back-link {
+      display: inline-block;
+      margin-top: 1rem;
+      color: #3399ff;
+      text-decoration: none;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+    }
+    a.back-link:hover,
+    a.back-link:focus {
+      text-decoration: underline;
+      outline: none;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        padding: 0.5rem 0.75rem;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="dashboard.html" class="brand">Atur Aja</a>
+      <div class="nav-buttons">
+        <a href="input.html">Input Data</a>
+        <a href="simulasi.html">Simulasi</a>
+        <a href="laporan.html">Laporan</a>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <h1>Daftar Hasil Simulasi Terdahulu</h1>
+    <div class="btn-group" role="group" aria-label="Opsi ekspor laporan">
+      <button id="exportPdfBtn" type="button" aria-label="Ekspor laporan ke PDF">Ekspor ke PDF</button>
+      <button id="exportExcelBtn" type="button" aria-label="Ekspor laporan ke Excel">Ekspor ke Excel</button>
+    </div>
+    <table aria-describedby="tableDesc" role="table">
+      <caption id="tableDesc" class="sr-only">Tabel menampilkan daftar hasil simulasi produksi sebelumnya dengan tanggal, input, dan hasil simulasi</caption>
+      <thead>
+        <tr>
+          <th scope="col">Tanggal</th>
+          <th scope="col">Input</th>
+          <th scope="col">Hasil Simulasi</th>
+          <th scope="col">Total Biaya (Rp)</th>
+          <th scope="col">Total Pendapatan (Rp)</th>
+          <th scope="col">Estimasi Keuntungan (Rp)</th>
+          <th scope="col">Sisa Bahan</th>
+        </tr>
+      </thead>
+      <tbody id="reportTableBody">
+        <!-- Data akan dimuat di sini -->
+      </tbody>
+    </table>
+    <a href="dashboard.html" class="back-link" aria-label="Kembali ke dashboard">← Kembali ke Dashboard</a>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    // Contoh data laporan simulasi (seharusnya diambil dari backend atau localStorage)
+    const reports = [
+      {
+        date: '2025-05-20 14:30',
+        input: 'Target Keuntungan: Rp 10.000.000',
+        simulationResult: 'Produk A: 100 unit, Produk B: 50 unit',
+        totalCost: 7000000,
+        totalRevenue: 12000000,
+        profit: 5000000,
+        remainingMaterials: 'Bahan A: 20 unit, Bahan B: 10 unit'
+      },
+      {
+        date: '2025-05-21 09:15',
+        input: 'Jumlah Bahan Tersedia: Bahan A 200 unit, Bahan B 100 unit',
+        simulationResult: 'Produk A: 80 unit, Produk B: 40 unit',
+        totalCost: 6000000,
+        totalRevenue: 10000000,
+        profit: 4000000,
+        remainingMaterials: 'Bahan A: 0 unit, Bahan B: 5 unit'
+      }
+    ];
+
+    const tableBody = document.getElementById('reportTableBody');
+
+    function loadReports() {
+      tableBody.innerHTML = '';
+      if (reports.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 7;
+        td.textContent = 'Belum ada laporan simulasi.';
+        td.style.textAlign = 'center';
+        tr.appendChild(td);
+        tableBody.appendChild(tr);
+        return;
+      }
+      reports.forEach(report => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${report.date}</td>
+          <td>${report.input}</td>
+          <td>${report.simulationResult}</td>
+          <td>${report.totalCost.toLocaleString('id-ID')}</td>
+          <td>${report.totalRevenue.toLocaleString('id-ID')}</td>
+          <td>${report.profit.toLocaleString('id-ID')}</td>
+          <td>${report.remainingMaterials}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Export to PDF using jsPDF
+    document.getElementById('exportPdfBtn').addEventListener('click', () => {
+      import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').then(({ jsPDF }) => {
+        const doc = new jsPDF.jsPDF();
+        doc.setFontSize(18);
+        doc.text('Laporan Simulasi Produksi - Atur Aja', 14, 22);
+        doc.setFontSize(12);
+        let y = 30;
+        reports.forEach((report, index) => {
+          doc.text(`Laporan #${index + 1}`, 14, y);
+          y += 6;
+          doc.text(`Tanggal: ${report.date}`, 14, y);
+          y += 6;
+          doc.text(`Input: ${report.input}`, 14, y);
+          y += 6;
+          doc.text(`Hasil Simulasi: ${report.simulationResult}`, 14, y);
+          y += 6;
+          doc.text(`Total Biaya: Rp ${report.totalCost.toLocaleString('id-ID')}`, 14, y);
+          y += 6;
+          doc.text(`Total Pendapatan: Rp ${report.totalRevenue.toLocaleString('id-ID')}`, 14, y);
+          y += 6;
+          doc.text(`Estimasi Keuntungan: Rp ${report.profit.toLocaleString('id-ID')}`, 14, y);
+          y += 6;
+          doc.text(`Sisa Bahan: ${report.remainingMaterials}`, 14, y);
+          y += 12;
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+        });
+        doc.save('laporan_simulasi_atur_aja.pdf');
+      });
+    });
+
+    // Export to Excel using SheetJS
+    document.getElementById('exportExcelBtn').addEventListener('click', () => {
+      const wb = XLSX.utils.book_new();
+      const wsData = [
+        ['Tanggal', 'Input', 'Hasil Simulasi', 'Total Biaya (Rp)', 'Total Pendapatan (Rp)', 'Estimasi Keuntungan (Rp)', 'Sisa Bahan']
+      ];
+      reports.forEach(report => {
+        wsData.push([
+          report.date,
+          report.input,
+          report.simulationResult,
+          report.totalCost,
+          report.totalRevenue,
+          report.profit,
+          report.remainingMaterials
+        ]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Laporan Simulasi');
+      XLSX.writeFile(wb, 'laporan_simulasi_atur_aja.xlsx');
+    });
+
+    // Load reports on page load
+    window.addEventListener('DOMContentLoaded', loadReports);
+  </script>
+</body>
+</html>
